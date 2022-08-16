@@ -1,0 +1,14 @@
+callee==0.3.1
+coverage==5.5
+factory-boy==3.2.0
+mypy==0.910
+pydocstyle==6.1.1
+pylint==2.9.3
+pytest-cov==2.12.1
+pytest==6.2.4
+pyyaml==6.0
+uvicorn==0.15.0
+flake8==3.9.2
+moto[s3,dynamodb,sqs]==2.3.2
+colorlog==6.6.0
+parameterized==0.8.1
