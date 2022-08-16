@@ -3,11 +3,11 @@
 set -e
 
 
-DOCKER_APP_ID=`docker-compose -f ./docker-compose.test.yml ps -q golf_app_test`
+DOCKER_APP_ID=`docker-compose -f ./docker-compose.test.yml ps -q app_test`
 if [ -z $DOCKER_APP_ID ] || [ -z `docker ps -q --no-trunc | grep $DOCKER_APP_ID` ]; then
   echo "Running in new test container"
-  docker-compose -f ./docker-compose.test.yml run golf_app_test pytest "$@"
+  docker-compose -f ./docker-compose.test.yml run app_test pytest "$@"
 else
   echo "Running in existing test container ${DOCKER_APP_ID}"
-  docker-compose -f ./docker-compose.test.yml exec golf_app_test pytest "$@"
+  docker-compose -f ./docker-compose.test.yml exec app_test pytest "$@"
 fi
