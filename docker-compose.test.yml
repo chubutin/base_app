@@ -1,0 +1,57 @@
+version: '3.9'
+services:
+
+  app_test:
+    container_name: app_backend_test
+    environment:
+      - APP_DB_USER=golf
+      - APP_DB_PASS=golf
+      - APP_DB_NAME=golf_db
+      - DB_HOST=db_test
+      - DB_PORT=5432
+    build:
+      context: ./backend
+      target: dev
+    command:  uvicorn app.main:app --reload --workers 1 --host 0.0.0.0 --port 3000
+    volumes:
+      - ./backend:/golf_app
+    ports:
+      - 3000:3000
+    networks:
+      - app-network
+    depends_on:
+      - db_test
+
+  db_test:
+    container_name: app_db_test
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=postgres
+      - APP_DB_USER=golf
+      - APP_DB_PASS=golf
+      - APP_DB_NAME=golf_db
+    healthcheck:
+      test: [ 'CMD', 'pg_isready', '-q', '-d', 'golf_db', '-U', 'postgres' ]
+      timeout: 30s
+      interval: 5s
+      retries: 10
+    image: postgres:12-alpine3.14
+    restart: always
+    ports:
+      - '5466:5432'
+    volumes:
+      - db_data_dev:/var/lib/postgresql/data:cached
+      - ./db/:/docker-entrypoint-initdb.d/:ro
+    networks:
+      - app-network
+
+
+volumes:
+  db_data_dev:
+    driver: local
+
+
+networks:
+  app-network:
+    driver: bridge

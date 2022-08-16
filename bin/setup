@@ -1,0 +1,26 @@
+#!/bin/bash
+
+set -e # Exit immediately if a command exits with a non-zero exit status.
+
+BUILD_ENVIRONMENTS=${BUILD_ENVIRONMENTS:-"dev test"}
+
+for environment in $BUILD_ENVIRONMENTS
+do
+  dockerargs="--remove-orphans"
+  env_file=""
+  if [ "$environment" = "test" ] ; then dockerargs="$dockerargs --volumes"; fi
+  echo "== Stopping $environment containers with $dockerargs =="
+  docker-compose -f ./docker-compose.$environment.yml down $dockerargs
+
+  echo "== Building $environment containers =="
+  docker-compose -f ./docker-compose.$environment.yml build
+done
+
+echo "== Instantiating DB and schema =="
+bin/migrate
+
+for environment in $BUILD_ENVIRONMENTS
+do
+  echo "== Stopping $environment containers =="
+  docker-compose -f ./docker-compose.$environment.yml stop
+done
