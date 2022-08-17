@@ -2,10 +2,10 @@ from fastapi import HTTPException, Depends
 from jose import jwt, JWTError
 from starlette import status
 
-from auth import get_password_hash, oauth2_scheme
-from database import session_scope
-from models import User
+from auth import oauth2_scheme
+from models.user import User
 from models.auth import TokenData
+from services.user import UserCRUD
 from settings import Settings
 
 
@@ -23,7 +23,7 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
         token_data = TokenData(username=username)
     except JWTError:
         raise credentials_exception
-    user = get_user_by_username(username=token_data.username)
+    user = UserCRUD.get_user_by_username(username=token_data.username)
     if user is None:
         raise credentials_exception
     return user
@@ -34,14 +34,3 @@ async def get_current_active_user(current_user: User = Depends(get_current_user)
         raise HTTPException(status_code=400, detail="Inactive user")
     return current_user
 
-
-def get_user_by_username(username: str):
-    with session_scope() as session:
-        return session.query(User).filter_by(username=username).one()
-
-
-def save_user(user: User):
-    with session_scope() as session:
-        user.password = get_password_hash(user.password)
-        session.add(user)
-    return user

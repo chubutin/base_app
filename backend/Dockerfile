@@ -27,6 +27,7 @@ ENV PYTHONUNBUFFERED 1
 ENV PYTHONDONTWRITEBYTECODE 1
 
 COPY ./app ./app/
+COPY ./email_resources ./email_resources/
 
 EXPOSE 3000
 

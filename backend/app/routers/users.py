@@ -6,13 +6,13 @@ from fastapi.security import OAuth2PasswordRequestForm
 from starlette import status
 
 from auth import create_access_token, verify_password
-from errors import IntegrityErrorException
-from models import User, Player
+from auth.user import get_current_active_user
 from models.auth import Token
-from models.user import UserExternal
-from queries.user import save_user, get_current_active_user
-from queries.user import get_user_by_username
+from models.user import User
+from schemas.user import UserSchema, UserExternalSchema
+from services.user import UserService, UserCRUD
 from settings import Settings
+from utils.errors import IntegrityErrorException
 
 login_router = APIRouter(
     prefix="/token",
@@ -35,7 +35,7 @@ user_router_no_auth_required = APIRouter(
 
 
 def authenticate_user(username: str, password: str) -> Union[User, bool]:
-    user = get_user_by_username(username=username)
+    user = UserCRUD.get_user_by_username(username=username)
     if not user:
         return False
     if not verify_password(password, user.password):
@@ -59,20 +59,20 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(
     return {"access_token": access_token, "token_type": "bearer"}
 
 
-@user_router.get("/me", response_model=UserExternal)
+@user_router.get("/me", response_model=UserExternalSchema)
 async def route_read_users_me(current_user: User = Depends(get_current_active_user)):
-    current_user.__delattr__('password')
-    return current_user
+    return UserExternalSchema(**current_user.__dict__)
 
 
-@user_router_no_auth_required.post("", response_model=User)
-async def route_create_user(user: User):
+@user_router_no_auth_required.post("", response_model=UserExternalSchema)
+async def route_create_user(user: UserSchema):
     try:
-        user_db = save_user(user)
-        if user_db:
-            Player(handicap=22.5, user_id=user_db.id).save()
-        return user_db
+        user_model = User(**user.dict())
+        created_user = UserService.create_user(user_model)
+        return UserExternalSchema(**created_user.__dict__)
     except IntegrityErrorException as exc:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
                             detail=exc.message)
+
+
 

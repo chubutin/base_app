@@ -1,0 +1,11 @@
+#!/bin/bash
+
+set -e
+set -x
+
+pylint --rcfile .pylintrc backend/app/ "$@"
+flake8 backend/app/ "$@"
+
+flake8 backend/tests/ "$@"
+#pydocstyle backend/app/ "$@"
+#mypy backend/app "$@"

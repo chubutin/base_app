@@ -45,6 +45,18 @@
 				},
 				{
 					"name": "Create User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = JSON.parse(responseBody);",
+									"postman.setEnvironmentVariable(\"username\", jsonData.username)"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"auth": {
 							"type": "oauth2",
@@ -60,7 +72,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"username\": \"chubutin4\",\n  \"email\": \"chubutin4@gmail.com\",\n  \"first_name\": \"ramiro\",\n  \"last_name\": \"pugh\",\n  \"disabled\": false,\n  \"password\": \"ramiro123\"\n}",
+							"raw": "{\n  \"username\": \"{{$randomUserName}}\",\n  \"email\": \"{{$randomEmail}}\",\n  \"first_name\": \"{{$randomFirstName}}\",\n  \"last_name\": \"{{$randomLastName}}\",\n  \"disabled\": false,\n  \"password\": \"ramiro123\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -106,7 +118,7 @@
 							"formdata": [
 								{
 									"key": "username",
-									"value": "chubutin",
+									"value": "{{username}}",
 									"type": "text"
 								},
 								{

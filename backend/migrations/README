@@ -1,1 +1,10 @@
 Generic single-database configuration.
+
+
+    op.execute('CREATE SEQUENCE listing_id_seq \
+                   INCREMENT BY 1 \
+                   MINVALUE 1 \
+                   MAXVALUE 600000 \
+                   START 100000 \
+                   CACHE 100 \
+                   NO CYCLE;-- public.alembic_version definition')

@@ -1,11 +1,12 @@
 from contextlib import contextmanager
 
+from sqlalchemy import create_engine
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
-from sqlmodel import create_engine, SQLModel
 
-from errors import IntegrityErrorException
 from settings import Settings
+from utils.errors import IntegrityErrorException
 
 # SQLALCHEMY_DATABASE_URL = "postgresql://user:password@postgresserver/db"
 db_string_connection = f"postgresql://{Settings().db_username}:{Settings().db_password}@"\
@@ -16,6 +17,7 @@ engine = create_engine(db_string_connection)
 # create a configured "Session" class
 Session = sessionmaker(bind=engine, expire_on_commit=False)
 
+Base = declarative_base()
 
 @contextmanager
 def session_scope():
