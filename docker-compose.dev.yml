@@ -9,6 +9,7 @@ services:
       - APP_DB_NAME=${APP_DB_NAME}
       - DB_HOST=${DB_HOST}
       - DB_PORT=${DB_PORT}
+      - EMAIL_TEMPLATES_BASE_PATH=${EMAIL_TEMPLATES_BASE_PATH}
     build:
       context: ./backend
     command:  uvicorn app.main:app --reload --workers 1 --host 0.0.0.0 --port 3000
@@ -16,10 +17,12 @@ services:
       - ./backend:/golf_app
     depends_on:
       - db_dev
+      - mail_dev
     ports:
       - 3000:3000
     networks:
       - app-network
+
 
   db_dev:
     container_name: app_db
@@ -45,6 +48,18 @@ services:
       - ./db/01_setup_database.sh:/docker-entrypoint-initdb.d/01_setup_database.sh:ro
     networks:
       - app-network
+
+  mail_dev:
+    image: mailhog/mailhog
+    container_name: mail_dev
+    logging:
+      driver: 'none'  # disable saving logs
+    ports:
+      - 1025:1025 # smtp server
+      - 8025:8025 # web ui
+    networks:
+      - app-network
+
 
 
 volumes:

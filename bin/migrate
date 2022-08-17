@@ -9,9 +9,10 @@ do
 
   if [ -z $DOCKER_APP_ID ] || [ -z `docker ps -q --no-trunc | grep $DOCKER_APP_ID` ]; then
     echo "Running in new $environment container"
-    docker-compose $env_file -f ./docker-compose.$environment.yml run app_$environment alembic upgrade head "$@"
+    docker-compose -f ./docker-compose.$environment.yml run app_$environment alembic upgrade head "$@"
   else
     echo "Running in existing $environment container ${DOCKER_APP_ID}"
-    docker-compose $env_file -f ./docker-compose.$environment.yml exec app_$environment alembic upgrade head "$@"
+    docker-compose -f ./docker-compose.$environment.yml exec app_$environment alembic upgrade head "$@"
   fi
+  docker-compose -f ./docker-compose.$environment.yml stop "$@"
 done

@@ -1,60 +1,60 @@
 from unittest import TestCase
 
-from tests.factories import user_factory
-from errors import IntegrityErrorException
-from queries.user import save_user, get_user_by_username
+from services.user import UserCRUD
+from tests.factories import UserFactory
+from utils.errors import IntegrityErrorException
 
 
-class TestUserQueries(TestCase):
+class TestUserCRUD(TestCase):
 
     def test_create_user(self):
-        user = user_factory()
-        user_db = save_user(user)
+        user = UserFactory.build()
+        user_db = UserCRUD.save_user(user)
         self.assertIsNotNone(user_db)
 
     def test_create_user_with_same_username_raise_integrity_error(self):
-        user = user_factory()
-        save_user(user)
-        duplicated_user = user_factory(username=user.username)
+        user = UserFactory.build()
+        UserCRUD.save_user(user)
+        duplicated_user = UserFactory.build(username=user.username)
         with self.assertRaises(IntegrityErrorException):
-            save_user(duplicated_user)
+            UserCRUD.save_user(duplicated_user)
 
     def test_create_user_with_same_email_raise_integrity_error(self):
-        user = user_factory()
-        save_user(user)
-        duplicated_user = user_factory(email=user.email)
+        user = UserFactory.build()
+        UserCRUD.save_user(user)
+        duplicated_user = UserFactory.build(email=user.email)
         with self.assertRaises(IntegrityErrorException):
-            save_user(duplicated_user)
+            UserCRUD.save_user(duplicated_user)
 
     def test_create_user_with_null_first_name_fails(self):
-        user = user_factory()
+        user = UserFactory.build()
         user.first_name = None
         with self.assertRaises(IntegrityErrorException):
-            save_user(user)
+            UserCRUD.save_user(user)
 
     def test_create_user_with_null_last_name_fails(self):
-        user = user_factory()
+        user = UserFactory.build()
         user.last_name = None
         with self.assertRaises(IntegrityErrorException):
-            save_user(user)
+            UserCRUD.save_user(user)
 
     def test_create_user_with_null_email_fails(self):
-        user = user_factory()
+        user = UserFactory.build()
         user.email = None
         with self.assertRaises(IntegrityErrorException):
-            save_user(user)
+            UserCRUD.save_user(user)
 
     def test_create_user_with_null_username_fails(self):
-        user = user_factory()
+        user = UserFactory.build()
         user.username = None
         with self.assertRaises(IntegrityErrorException):
-            save_user(user)
+            UserCRUD.save_user(user)
 
     def test_get_user_by_username(self):
-        user = user_factory()
-        user_db = save_user(user)
+        user = UserFactory.build()
+        user_db = UserCRUD.save_user(user)
 
-        get_user_by_username(username=user.username)
+        UserCRUD.get_user_by_username(username=user.username)
         self.assertEqual(user, user_db)
 
 

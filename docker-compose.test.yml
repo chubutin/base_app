@@ -9,6 +9,10 @@ services:
       - APP_DB_NAME=golf_db
       - DB_HOST=db_test
       - DB_PORT=5432
+      - EMAIL_HOST=mail_test
+      - EMAIL_USE_TLS=False
+      - EMAIL_PORT=1025
+      - EMAIL_TEMPLATES_BASE_PATH=/golf_app/email_resources
     build:
       context: ./backend
       target: dev
@@ -17,13 +21,14 @@ services:
       - ./backend:/golf_app
     ports:
       - 3000:3000
-    networks:
-      - app-network
     depends_on:
+      - mail_test
       - db_test
+    networks:
+      - app-network-test
 
   db_test:
-    container_name: app_db_test
+    container_name: db_test
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
@@ -44,14 +49,23 @@ services:
       - db_data_dev:/var/lib/postgresql/data:cached
       - ./db/:/docker-entrypoint-initdb.d/:ro
     networks:
-      - app-network
+      - app-network-test
 
+  mail_test:
+    image: mailhog/mailhog
+    container_name: mail_test
+    logging:
+      driver: 'none'  # disable saving logs
+    ports:
+      - "1025:1025" # smtp server
+      - "8025:8025" # web ui
+    networks:
+      - app-network-test
 
 volumes:
   db_data_dev:
     driver: local
 
-
 networks:
-  app-network:
+  app-network-test:
     driver: bridge
