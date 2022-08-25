@@ -26,6 +26,9 @@ class Settings(BaseSettings):
     email_host_api_key = ''
     email_use_tls = os.getenv('EMAIL_USE_TLS', 'False') == 'True'
     email_from = 'shamoungolf@app.com'
-    email_templates_base_path = os.getenv('EMAIL_TEMPLATES_BASE_PATH')
+    email_templates_base_paths = os.getenv('EMAIL_TEMPLATES_BASE_PATH').split(',')
+    base_url = os.getenv('BASE_URL', 'http://localhost:3000')
+    base_activation_email_link = os.getenv('BASE_ACTIVATION_EMAIL_LINK', f'{base_url}/users/activate')
+    email_template_name_user_activation = 'activate_account.html'
 
 

@@ -1,6 +1,29 @@
 import re
 
-from psycopg2._psycopg import Diagnostics
+
+class NotFoundError(Exception):
+    """Requested entity not found."""
+
+
+class UnexpectedError(Exception):
+    """Unexpected error."""
+
+
+class ApiNotImplementedError(Exception):
+    """API not implemented error."""
+
+
+class NotAuthorizedError(Exception):
+    """User not authorized."""
+
+
+class BadRequestError(Exception):
+    """Request error."""
+
+
+class AppException(Exception):
+    """ Main Exception for the app"""
+
 
 
 class IntegrityErrorException(Exception):

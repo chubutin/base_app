@@ -15,3 +15,5 @@ class User(AppBaseModel):
     disabled = sa.Column(sa.Boolean, default=False, nullable=False)
     avatar_url = sa.Column(sa.String, default=None, nullable=True)
     password = sa.Column(sa.String, nullable=False)
+    activated = sa.Column(sa.Boolean, default=False, nullable=False)
+    hash_activation = sa.Column(sa.String, nullable=True)

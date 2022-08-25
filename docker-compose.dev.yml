@@ -2,7 +2,7 @@ version: '3.9'
 services:
 
   app_dev:
-    container_name: app_backend
+    container_name: app_dev
     environment:
       - APP_DB_USER=${APP_DB_USER}
       - APP_DB_PASS=${APP_DB_PASS}
@@ -10,6 +10,9 @@ services:
       - DB_HOST=${DB_HOST}
       - DB_PORT=${DB_PORT}
       - EMAIL_TEMPLATES_BASE_PATH=${EMAIL_TEMPLATES_BASE_PATH}
+      - EMAIL_HOST=${EMAIL_HOST}
+      - EMAIL_USE_TLS=False
+      - EMAIL_PORT=1025
     build:
       context: ./backend
     command:  uvicorn app.main:app --reload --workers 1 --host 0.0.0.0 --port 3000
@@ -25,7 +28,7 @@ services:
 
 
   db_dev:
-    container_name: app_db
+    container_name: db_dev
     environment:
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
@@ -55,11 +58,10 @@ services:
     logging:
       driver: 'none'  # disable saving logs
     ports:
-      - 1025:1025 # smtp server
-      - 8025:8025 # web ui
+      - "1025:1025" # smtp server
+      - "8025:8025" # web ui
     networks:
       - app-network
-
 
 
 volumes:

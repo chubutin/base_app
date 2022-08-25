@@ -4,9 +4,6 @@ WORKDIR /golf_app
 
 COPY requirements.txt ./
 
-COPY requirements-dev.txt ./
-
-
 ENV PYTHONPATH=/golf_app/app
 
 ENV APP_MODULE="app.main:app"
@@ -21,8 +18,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     apt-get remove -y gcc python3-dev && \
     apt-get autoremove -y && rm -rf /var/lib/apt/lists/*
 
-RUN pip install --no-cache-dir -r requirements-dev.txt
-
 ENV PYTHONUNBUFFERED 1
 ENV PYTHONDONTWRITEBYTECODE 1
 
@@ -34,6 +29,9 @@ EXPOSE 3000
 # ============================== DEVELOPMENT/TEST ============================
 
 FROM base AS dev
+
+COPY requirements-dev.txt ./
+RUN pip install --no-cache-dir -r requirements-dev.txt
 
 COPY ./tests ./tests/
 COPY pytest.ini ./

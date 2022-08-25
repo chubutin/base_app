@@ -2,4 +2,4 @@
 
 set -e
 
-bin/test --cov backend/coverage --cov-report term-missing --cov-report html:coverage  "$@"
+bin/test --cov --cov-report term-missing --cov-report html:coverage --cov-append"$@"

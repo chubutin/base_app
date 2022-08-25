@@ -43,6 +43,10 @@ def authenticate_user(username: str, password: str) -> Union[User, bool]:
     return user
 
 
+def create_dict_for_access_token(username: str):
+    return {"sub": username}
+
+
 @login_router.post("", response_model=Token)
 async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends()):
     user = authenticate_user(form_data.username, form_data.password)
@@ -54,7 +58,8 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(
         )
     access_token_expires = timedelta(minutes=Settings().access_token_expire_minutes)
     access_token = create_access_token(
-        data={"sub": user.username}, expires_delta=access_token_expires
+        data=create_dict_for_access_token(username=user.username),
+        expires_delta=access_token_expires
     )
     return {"access_token": access_token, "token_type": "bearer"}
 
@@ -72,7 +77,17 @@ async def route_create_user(user: UserSchema):
         return UserExternalSchema(**created_user.__dict__)
     except IntegrityErrorException as exc:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
-                            detail=exc.message)
+                            detail='Another user was created with that data')
 
 
+@user_router_no_auth_required.post("/activate", response_model=UserExternalSchema)
+async def route_activate_user(activation_code: str):
+    # try:
+    #     user_model = User(**user.dict())
+    #     created_user = UserService.create_user(user_model)
+    #     return UserExternalSchema(**created_user.__dict__)
+    # except IntegrityErrorException as exc:
+    #     raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+    #                         detail=exc.message)
+    pass
 
