@@ -12,7 +12,7 @@ services:
       - EMAIL_HOST=mail_test
       - EMAIL_USE_TLS=False
       - EMAIL_PORT=1025
-      - EMAIL_TEMPLATES_BASE_PATH=/golf_app/email_resources
+      - EMAIL_TEMPLATES_BASE_PATH=/golf_app/tests/email_resources,/golf_app/email_resources
     build:
       context: ./backend
       target: dev

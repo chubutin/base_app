@@ -4,6 +4,8 @@ from unittest import TestCase
 from fastapi.testclient import TestClient
 
 from app.main import app
+from models.user import User
+from routers.users import authenticate_user
 from tests.factories import UserSchemaFactory, UserFactory
 from services.user import UserService
 
@@ -43,6 +45,18 @@ class TestUsersRouters(TestCase):
         self.assertIsNotNone(user_response)
         self.assertIsNotNone(user_response['id'])
 
+    def test_create_user_route_with_repeated_user__returns_error(self):
+        user = UserFactory.build()
+        # we save the password in another variable because  the password will get hashed
+        password = user.password
+        UserService.create_user(user)
+
+        user_json = UserSchemaFactory.build(username=user.username, password=password)
+
+        response = self.client.post("/users", json=json.loads(user_json.json()))
+        self.assertEqual(400, response.status_code)
+        self.assertEqual(response.json().get('detail'), 'Another user was created with that data')
+
     def test_users_me_route(self):
         user = UserFactory.build()
         # we save the password in another variable because  the password will get hashed
@@ -62,4 +76,25 @@ class TestUsersRouters(TestCase):
         self.assertIsNotNone(response.json())
         self.assertEqual(str(user.id), response.json()['id'])
 
+
+
+class TestAuthenticateUser(TestCase):
+
+    def test_authenticate_user(self):
+        user = UserFactory.build()
+        # we save the password in another variable because  the password will get hashed
+        password = user.password
+        UserService.create_user(user)
+
+        authenticated_user = authenticate_user(username=user.username, password=password)
+        self.assertIsNotNone(authenticated_user)
+        self.assertIsInstance(authenticated_user, User)
+
+    def test_authenticate_user__username_not_exist__returns_none(self):
+        self.assertFalse(authenticate_user(username='asdasd', password='asdasd'))
+
+    def test_authenticate_user__incorrect_password__returns_none(self):
+        user = UserFactory.build()
+        UserService.create_user(user)
+        self.assertFalse(authenticate_user(username=user.username, password='fakepassword'))
 

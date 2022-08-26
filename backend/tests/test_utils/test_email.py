@@ -1,21 +1,17 @@
 from typing import Dict
 from unittest import TestCase
+from unittest.mock import patch
 
 from utils.email import EmailSender, Email, get_email_template_by_name
+from utils.errors import AppException
 
 
 def email_factory(subject: str = None, to: str = None,
-                  email_html: str = None, email_template: str = None,
-                  email_variables: Dict[str, str] = None):
-    if email_html or not email_template:
-        return Email(subject=subject if subject else 'Hola Mundo',
-                     to=to if to else 'test@app.com',
-                     email_html=email_html if email_html else'<b>Primer mensaje<b>' )
-    else:
-        return Email(subject=subject if subject else 'Hola Mundo',
-                     to=to if to else 'test@app.com',
-                     email_template=email_template if email_template else '<b>First message with {{foo_variable}}<b>',
-                     email_variables=email_variables if email_variables else {'foo_variable': 'foo_value'})
+                  email_html: str = None, email_variables: Dict[str, str] = None):
+    return Email(subject=subject if subject else 'Hola Mundo',
+                 to=to if to else 'test@app.com',
+                 email_html=email_html if email_html else '<b>First message with {{foo_variable}}<b>',
+                 email_variables=email_variables if email_variables else {'foo_variable': 'foo_value'})
 
 
 class TestSendEmail(TestCase):
@@ -35,11 +31,13 @@ class TestSendEmail(TestCase):
         email.subject = None
         EmailSender.send(email)
 
-    def test_send_email_no_body__assert_raise_error(self):
+    def test_send_email_no_body__sends_only_subject(self):
         email = email_factory()
         email.content = None
-        with self.assertRaises(TypeError):
+        with patch('utils.email.smtplib.SMTP.sendmail') as send_mock:
             EmailSender.send(email)
+            email_argument = send_mock.call_args_list[0][1]
+            self.assertEqual(email_argument['msg'], f'Subject: {email.subject}\n\n')
 
 
 class TestEmail(TestCase):
@@ -48,26 +46,29 @@ class TestEmail(TestCase):
         fake_html = '<p>Hello World</p>'
         email = email_factory(email_html=fake_html)
         self.assertEqual(fake_html, email.content)
-        self.assertEqual(fake_html, email.get_content())
+        self.assertIn(fake_html, email.get_content())
 
     def test_create_email_with_template(self):
-        fake_template = '<p>Hello {{name}}</p>'
         fake_variables = {'name': 'App'}
-        expected_content = '<p>Hello App</p>'
-        email = email_factory(email_template=fake_template, email_variables=fake_variables)
-        self.assertEqual(expected_content, email.get_content())
+        subject = 'Hello World'
+        expected_content = f'Subject: {subject}\n\n<b>First message with {{{{foo_variable}}}}<b>'
+        email = Email(
+            subject=subject, to='test@app.com',
+            email_template='test_template.html', email_variables=fake_variables)
+        self.assertIn(expected_content, email.get_content())
 
     def test_create_email_with_html_and_template_assert_raises_exception(self):
         with self.assertRaises(ValueError):
             Email(to='as@as.com', subject='new email', email_template='asdasd', email_html='asdas')
 
     def test_read_email_templates_with_real_path(self):
-        template_name = 'activate_account.html'
+        template_name = 'test_template.html'
         template_content = get_email_template_by_name(template_name=template_name)
         self.assertIsNotNone(template_content)
 
     def test_read_email_templates_with_incorrect_path(self):
         template_name = 'fake_file_name.html'
-        with self.assertRaises(FileNotFoundError):
+        with self.assertRaises(AppException) as exc_context:
             get_email_template_by_name(template_name=template_name)
+        self.assertEqual(str(exc_context.exception), f'Email template {template_name} not found')
 
