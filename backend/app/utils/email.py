@@ -61,6 +61,5 @@ class EmailSender:
             server.ehlo()
             server.sendmail(from_addr=settings.email_from, to_addrs=email.to, msg=email.get_content())
             server.close()
-            print('Email sent!')
         except Exception as exception:
             raise exception
