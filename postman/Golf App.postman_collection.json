@@ -31,6 +31,48 @@
 							"raw": ""
 						},
 						"url": {
+							"raw": "{{api_url}}/users/activate/?activation_code=123123",
+							"host": [
+								"{{api_url}}"
+							],
+							"path": [
+								"users",
+								"activate",
+								""
+							],
+							"query": [
+								{
+									"key": "activation_code",
+									"value": "123123"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Activate User",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "oauth2",
+							"oauth2": [
+								{
+									"key": "addTokenTo",
+									"value": "header",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
 							"raw": "{{api_url}}/users/me",
 							"host": [
 								"{{api_url}}"
@@ -51,7 +93,8 @@
 							"script": {
 								"exec": [
 									"var jsonData = JSON.parse(responseBody);",
-									"postman.setEnvironmentVariable(\"username\", jsonData.username)"
+									"postman.setEnvironmentVariable(\"username\", jsonData.username);",
+									"postman.setEnvironmentVariable(\"password\", \"password123\");"
 								],
 								"type": "text/javascript"
 							}
@@ -72,7 +115,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"username\": \"{{$randomUserName}}\",\n  \"email\": \"{{$randomEmail}}\",\n  \"first_name\": \"{{$randomFirstName}}\",\n  \"last_name\": \"{{$randomLastName}}\",\n  \"disabled\": false,\n  \"password\": \"ramiro123\"\n}",
+							"raw": "{\n  \"username\": \"{{$randomUserName}}\",\n  \"email\": \"{{$randomEmail}}\",\n  \"first_name\": \"{{$randomFirstName}}\",\n  \"last_name\": \"{{$randomLastName}}\",\n  \"disabled\": false,\n  \"password\": \"password123\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -123,7 +166,7 @@
 								},
 								{
 									"key": "password",
-									"value": "ramiro123",
+									"value": "{{password}}",
 									"type": "text"
 								}
 							]
