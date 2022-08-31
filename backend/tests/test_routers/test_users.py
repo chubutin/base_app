@@ -76,6 +76,31 @@ class TestUsersRouters(TestCase):
         self.assertIsNotNone(response.json())
         self.assertEqual(str(user.id), response.json()['id'])
 
+    def test_activate_user_route(self):
+        user = UserFactory.build()
+        # we save the password in another variable because  the password will get hashed
+        UserService.create_user(user)
+
+        activate_url = f'/users/activate/?activation_code={user.hash_activation}'
+
+        response = self.client.get(activate_url)
+
+        self.assertEqual(200, response.status_code)
+        self.assertIsNotNone(response.json())
+        self.assertEqual('User Activated', response.json()['message'])
+
+    def test_activate_user_route__fails_wrong_activation_code(self):
+        user = UserFactory.build()
+        # we save the password in another variable because  the password will get hashed
+        UserService.create_user(user)
+        hash_activation_fake = 'fake_hash'
+
+        activate_url = f'/users/activate/?activation_code={hash_activation_fake}'
+
+        response = self.client.get(activate_url)
+
+        self.assertEqual(400, response.status_code)
+        self.assertIn(hash_activation_fake, response.json()['request'])
 
 
 class TestAuthenticateUser(TestCase):
@@ -97,4 +122,3 @@ class TestAuthenticateUser(TestCase):
         user = UserFactory.build()
         UserService.create_user(user)
         self.assertFalse(authenticate_user(username=user.username, password='fakepassword'))
-

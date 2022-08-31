@@ -36,8 +36,8 @@ class UserService(AppService):
     @classmethod
     def create_user(cls, user: User):
         user.password = get_password_hash(user.password)
-        user_created = UserCRUD.save_user(user)
         user.hash_activation = cls.create_user_activation_hash(user.username)
+        user_created = UserCRUD.save_user(user)
         cls.create_and_send_activation_email(user)
         return user_created
 

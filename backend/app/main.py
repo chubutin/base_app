@@ -1,8 +1,10 @@
-from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi import FastAPI, Request
+from fastapi.responses import JSONResponse
 
 from routers.users import user_router, user_router_no_auth_required, login_router
 from settings import Settings
+from utils.errors import AppException
 
 origins = [
     "http://localhost.tiangolo.com",
@@ -35,3 +37,12 @@ async def read_root():
 @app.get("/")
 async def home():
     return {"hello": "world"}
+
+
+@app.exception_handler(AppException)
+async def unicorn_exception_handler(request: Request, exc: AppException):
+    return JSONResponse(
+        status_code=400,
+        content={"message": f"{exc}",
+                 "request": str(request.url)},
+    )

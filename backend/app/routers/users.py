@@ -81,15 +81,14 @@ async def route_create_user(user: UserSchema):
                             detail='Another user was created with that data')
 
 
-@user_router_no_auth_required.post("/activate", response_model=UserExternalSchema)
+@user_router_no_auth_required.get("/activate")
 async def route_activate_user(activation_code: str):
-    # try:
-    #     user_model = User(**user.dict())
-    #     created_user = UserService.create_user(user_model)
-    #     return UserExternalSchema(**created_user.__dict__)
-    # except IntegrityErrorException as exc:
-    #     raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
-    #                         detail=exc.message)
+    try:
+        UserService.activate_user(activation_code=activation_code)
+        return {'message': 'User Activated'}
+    except IntegrityErrorException as exc:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                            detail=exc.message)
     pass
 
 
