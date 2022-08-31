@@ -28,6 +28,7 @@ class UserFactory(SQLAlchemyModelFactory):
     avatar_url = None
     activated = False
     password = factory.LazyFunction(fake.password)
+    hash_activation = factory.LazyFunction(fake.text)
 
 
 class PlayerFactory(SQLAlchemyModelFactory):

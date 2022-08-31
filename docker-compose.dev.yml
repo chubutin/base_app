@@ -22,7 +22,7 @@ services:
       - db_dev
       - mail_dev
     ports:
-      - 3000:3000
+      - "3000:3000"
     networks:
       - app-network
 
