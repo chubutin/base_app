@@ -28,7 +28,9 @@ class Settings(BaseSettings):
     email_from = 'shamoungolf@app.com'
     email_templates_base_paths = os.getenv('EMAIL_TEMPLATES_BASE_PATH').split(',')
     base_url = os.getenv('BASE_URL', 'http://localhost:3000')
-    base_activation_email_link = os.getenv('BASE_ACTIVATION_EMAIL_LINK', f'{base_url}/users/activate?activation_code=')
+    base_activation_email_link = os.getenv('BASE_ACTIVATION_EMAIL_LINK', f'{base_url}/users/activate')
+    base_reset_password_link = os.getenv('BASE_RESET_PASSWORD_LINK', f'{base_url}/users/reset-password')
     email_template_name_user_activation = 'activate_account.html'
+    email_template_name_reset_password = 'reset_password.html'
 
 

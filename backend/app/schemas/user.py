@@ -1,6 +1,6 @@
 from typing import Optional
 
-from pydantic import EmailStr
+from pydantic import EmailStr, BaseModel
 
 from app.schemas.base import AppBaseModelSchema
 
@@ -19,3 +19,4 @@ class UserExternalSchema(AppBaseModelSchema):
 class UserSchema(UserExternalSchema):
 
     password: str
+

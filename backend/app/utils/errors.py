@@ -9,6 +9,10 @@ class UnexpectedError(Exception):
     """Unexpected error."""
 
 
+class DatabaseException(Exception):
+    """Errors related with database"""
+
+
 class ApiNotImplementedError(Exception):
     """API not implemented error."""
 

@@ -1,5 +1,6 @@
 import sqlalchemy as sa
 
+from auth import get_password_hash
 from models.base_model import AppBaseModel
 
 
@@ -17,3 +18,7 @@ class User(AppBaseModel):
     password = sa.Column(sa.String, nullable=False)
     activated = sa.Column(sa.Boolean, default=False, nullable=False)
     hash_activation = sa.Column(sa.String, nullable=True)
+    reset_password_hash = sa.Column(sa.String, nullable=True)
+
+    def generate_reset_password_hash(self):
+        self.reset_password_hash = get_password_hash(password=f'{self.email}_{self.password}')

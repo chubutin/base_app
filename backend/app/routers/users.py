@@ -3,6 +3,7 @@ from typing import Union
 
 from fastapi import Depends, HTTPException, APIRouter
 from fastapi.security import OAuth2PasswordRequestForm
+from pydantic import EmailStr
 from starlette import status
 
 from auth import create_access_token, verify_password
@@ -89,4 +90,9 @@ async def route_activate_user(activation_code: str):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
                             detail=exc.message)
     pass
+
+
+@user_router_no_auth_required.post("/reset-password")
+async def reset_password_user(email: str):
+    return {'message': 'Email sent'}
 
