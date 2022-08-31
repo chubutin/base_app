@@ -19,7 +19,7 @@ jobs:
           context: ./backend
           file: ./backend/Dockerfile
           push: true
-          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/golf-app:latest
+          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/golf-app:eng:${{ github.head_ref }}
 
   test:
     timeout-minutes: 10
