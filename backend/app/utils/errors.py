@@ -25,7 +25,6 @@ class AppException(Exception):
     """ Main Exception for the app"""
 
 
-
 class IntegrityErrorException(Exception):
 
     @staticmethod
