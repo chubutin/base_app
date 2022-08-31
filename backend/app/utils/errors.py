@@ -9,6 +9,10 @@ class UnexpectedError(Exception):
     """Unexpected error."""
 
 
+class DatabaseException(Exception):
+    """Errors related with database"""
+
+
 class ApiNotImplementedError(Exception):
     """API not implemented error."""
 
@@ -23,7 +27,6 @@ class BadRequestError(Exception):
 
 class AppException(Exception):
     """ Main Exception for the app"""
-
 
 
 class IntegrityErrorException(Exception):

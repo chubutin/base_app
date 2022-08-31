@@ -7,7 +7,7 @@ from services.user import UserCRUD, UserService
 from settings import Settings
 from tests.factories import UserFactory
 from utils.email import get_email_template_by_name
-from utils.errors import IntegrityErrorException, AppException
+from utils.errors import IntegrityErrorException, AppException, DatabaseException
 
 settings = Settings()
 
@@ -89,6 +89,16 @@ class TestUserService(TestCase):
             UserService.activate_user(user.hash_activation)
             self.assertEqual(exc_info.value.args[0], 'User is deactivated')
 
+    def test_initialize_reset_password_and_send_email(self):
+        user = UserFactory.build()
+        user.activated = False
+        user.disabled = True
+        UserService.create_user(user)
+
+        with patch('app.services.user.EmailSender.send') as send_mock:
+            UserService.initialize_reset_password_and_send_email(user.email)
+            send_mock.assert_called()
+
 
 class TestUserCRUD(TestCase):
 
@@ -137,9 +147,75 @@ class TestUserCRUD(TestCase):
 
     def test_get_user_by_username(self):
         user = UserFactory.build()
-        user_db = UserCRUD.save_user(user)
+        user = UserCRUD.save_user(user)
 
-        UserCRUD.get_user_by_username(username=user.username)
-        self.assertEqual(user, user_db)
+        user_retrieved = UserCRUD.get_user_by_username(username=user.username)
+        self.assertEqual(user.id, user_retrieved.id)
 
+    def test_get_filter_by_single_parameter(self):
+        user = UserFactory.build()
+        UserCRUD.save_user(user)
+
+        filter_parameters = {'username': user.username}
+
+        user_crud = UserCRUD()
+        result = user_crud.filter_by(**filter_parameters)
+        self.assertIsNotNone(result)
+        self.assertNotEqual(result, [])
+
+        self.assertEqual(user.id, result[0].id)
+
+    def test_get_filter_by_single_parameter_with_wrong_filter(self):
+        user = UserFactory.build()
+        UserCRUD.save_user(user)
+
+        filter_parameters = {'username': 'fake_username'}
+
+        user_crud = UserCRUD()
+        result = user_crud.filter_by(**filter_parameters)
+        self.assertIsNotNone(result)
+        self.assertEqual(result, [])
+
+    def test_get_filter_by_multiple_parameters(self):
+        user = UserFactory.build()
+        UserCRUD.save_user(user)
+
+        filter_parameters = {'username': user.username,
+                             'email': user.email}
+
+        user_crud = UserCRUD()
+        result = user_crud.filter_by(**filter_parameters)
+        self.assertIsNotNone(result)
+        self.assertNotEqual(result, [])
+
+        self.assertEqual(user.id, result[0].id)
+
+    def test_get_filter_by_multiple_parameters_with_wrong_filter(self):
+        user = UserFactory.build()
+        UserCRUD.save_user(user)
+
+        filter_parameters = {'username': user.username,
+                             'email': 'fake_email'}
+
+        user_crud = UserCRUD()
+        result = user_crud.filter_by(**filter_parameters)
+        self.assertIsNotNone(result)
+        self.assertEqual(result, [])
+
+    def test_get_filter_by_with_wrong_name_parameter(self):
+        filter_parameters = {'fake_field': 'fake_value'}
+
+        user_crud = UserCRUD()
+
+        with self.assertRaises(DatabaseException):
+            user_crud.filter_by(**filter_parameters)
+
+    def test_get_filter_by_with_null_value_parameter(self):
+        filter_parameters = {'username': None}
+
+        user_crud = UserCRUD()
+
+        result = user_crud.filter_by(**filter_parameters)
+        self.assertIsNotNone(result)
+        self.assertEqual(result, [])
 
