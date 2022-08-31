@@ -19,7 +19,7 @@ jobs:
           context: ./backend
           file: ./backend/Dockerfile
           push: true
-          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/golf-app:eng:$GITHUB_HEAD_REF
+          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/golf-app:eng:${{ env.GITHUB_HEAD_REF }}
 
   test:
     needs: build
