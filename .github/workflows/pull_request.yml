@@ -6,6 +6,10 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+      - name: Extract branch name
+        shell: bash
+        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
+        id: extract_branch
       - name: Login to Docker Hub
         uses: docker/login-action@v1
         with:
@@ -19,7 +23,7 @@ jobs:
           context: ./backend
           file: ./backend/Dockerfile
           push: true
-          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/golf-app:eng:${{ env.GITHUB_HEAD_REF }}
+          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/golf-app:eng:${{ steps.extract_branch.outputs.branch }}
 
   test:
     needs: build
