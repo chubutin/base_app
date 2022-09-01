@@ -1,0 +1,49 @@
+name: Build and Test
+on: push
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Extract branch name
+        shell: bash
+        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
+        id: extract_branch
+      - name: Login to Docker Hub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+      - name: Build and push Backend
+        uses: docker/build-push-action@v2
+        with:
+          context: ./backend
+          file: ./backend/Dockerfile
+          push: true
+          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/golf-app:${{ steps.extract_branch.outputs.branch }}
+
+  test:
+    needs: build
+    timeout-minutes: 10
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Build Containers
+        run: docker-compose -f "docker-compose.test.yml" up -d --build
+
+      - name: Apply Migrations
+        run: docker-compose -f "docker-compose.test.yml" run app_test alembic upgrade head
+
+      - name: Run Tests
+        run: docker-compose -f "docker-compose.test.yml" run app_test pytest
+
+      - name: Stop containers
+        if: always()
+        run: docker-compose -f "docker-compose.test.yml" down --remove-orphans

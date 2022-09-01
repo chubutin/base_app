@@ -1,5 +1,10 @@
 # Golf App
 
+### Configure local githooks
+
+```shell
+git config --local core.hooksPath .githooks/
+```
 
 ### How to configure all project
 

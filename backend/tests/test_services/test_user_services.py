@@ -49,11 +49,9 @@ class TestUserService(TestCase):
                              get_email_template_by_name(settings.email_template_name_user_activation))
 
     def test_activate_user(self):
-        hash_activation = self.fake.text()
         user = UserFactory.build()
-        user.hash_activation = hash_activation
         UserService.create_user(user)
-        UserService.activate_user(hash_activation)
+        UserService.activate_user(user.hash_activation)
 
         user_db = UserCRUD.get_user_by_username(user.username)
         self.assertTrue(user_db)
