@@ -42,7 +42,17 @@ jobs:
         run: docker-compose -f "docker-compose.test.yml" run app_test alembic upgrade head
 
       - name: Run Tests
-        run: docker-compose -f "docker-compose.test.yml" run app_test pytest
+        run: docker-compose -f "docker-compose.test.yml" run app_test pytest --cov --cov-report=term-missing:skip-covered | tee pytest-coverage.txt
+
+      - name: Pytest coverage comment
+        uses: MishaKav/pytest-coverage-comment@main
+        with:
+          pytest-coverage-path: ./pytest-coverage.txt
+
+      - name: Update Readme with Coverage Html
+        if: ${{ github.ref == 'refs/heads/main' }}
+        run: |
+          sed -i '/<!-- Pytest Coverage Comment:Begin -->/,/<!-- Pytest Coverage Comment:End -->/c\<!-- Pytest Coverage Comment:Begin -->\n\${{ steps.coverageComment.outputs.coverageHtml }}\n${{ steps.coverageComment.outputs.summaryReport }}\n<!-- Pytest Coverage Comment:End -->' ./README.md
 
       - name: Stop containers
         if: always()
