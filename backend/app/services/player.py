@@ -1,41 +1,33 @@
+from typing import Optional
 from uuid import UUID
 
-from config.database import session_scope
+from sqlalchemy.orm import Session
+
 from models.player import Player
+from services import AppCRUD, AppService
 
 
-class PlayerService:
+class PlayerService(AppService):
 
-    @staticmethod
-    def save_player(player: Player):
-        return PlayerCRUD.save_player(player)
+    def __init__(self, session: Optional[Session] = None):
+        super(PlayerService, self).__init__()
+        self.dao = PlayerCRUD(session)
 
-    @staticmethod
-    def get_player_by_user_id(user_id: UUID):
-        return PlayerCRUD.get_player_by_user_id(user_id)
+    def save_player(self, player: Player):
+        return self.dao.save_player(player)
+
+    def get_player_by_user_id(self, user_id: UUID):
+        return self.dao.get_player_by_user_id(user_id)
 
 
-class PlayerCRUD:
+class PlayerCRUD(AppCRUD):
 
-    @staticmethod
-    def save_player(player: Player):
-        with session_scope() as session:
-            session.add(player)
-        # need to execute this GET because the player_id is a sequence generated on the DB and the
-        # session is already expired
-        return session.query(Player).get(player.id)
+    def save_player(self, player: Player):
+        self.session.add(player)
+        return player
 
-    @staticmethod
-    def get_player_by_id(player_id: UUID):
-        with session_scope() as session:
-            return session.query(Player).filter_by(id=player_id).one_or_none()
+    def get_player_by_id(self, player_id: UUID):
+        return self.session.query(Player).filter_by(id=player_id).one_or_none()
 
-    @staticmethod
-    def get_player_by_golfer_id(golfer_id):
-        with session_scope() as session:
-            return session.query(Player).filter_by(golfer_id=golfer_id).one_or_none()
-
-    @staticmethod
-    def get_player_by_user_id(user_id):
-        with session_scope() as session:
-            return session.query(Player).filter_by(user_id=user_id).one_or_none()
+    def get_player_by_user_id(self, user_id):
+        return self.session.query(Player).filter_by(user_id=user_id).one_or_none()

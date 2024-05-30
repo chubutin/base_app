@@ -1,0 +1,11 @@
+#!/bin/bash
+
+set -e # Exit immediately if a command exits with a non-zero exit status.
+
+BUILD_ENVIRONMENTS=${BUILD_ENVIRONMENTS:-"dev test"}
+
+for environment in $BUILD_ENVIRONMENTS
+do
+  echo "== Building $environment containers =="
+  docker-compose -f ./docker-compose.$environment.yml build
+done

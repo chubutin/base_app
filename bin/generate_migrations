@@ -1,3 +1,25 @@
 #!/bin/bash
 
-docker-compose -f ./docker-compose.dev.yml run app_dev alembic revision --autogenerate
+set -e # Exit immediately if a command exits with a non-zero exit status.
+
+MIGRATIONS_VERSIONS_PATH="migrations/versions/"
+MIGRATION_NAME="$1"
+
+if [ -z "$MIGRATION_NAME" ] ; then
+  echo "Needs migration title"
+  echo "Usage: bin/generate_migration \"<migration title>\""
+  exit 1
+fi
+
+for n in $(seq -w 1 999); do
+  _file=(${MIGRATIONS_VERSIONS_PATH}${n}-*)
+  [[ ! -f "${_file}" ]] && {
+    NUMBERED_MIGRATION_NAME="${n}-$MIGRATION_NAME"
+    CLEANED_FILE_NAME="${NUMBERED_MIGRATION_NAME// /_}.py"
+
+    echo "Creating migration file at ${MIGRATIONS_VERSIONS_PATH}${CLEANED_FILE_NAME}"
+    docker-compose -f ./docker-compose.test.yml run app_test alembic revision --autogenerate -m ${n}
+    mv ${MIGRATIONS_VERSIONS_PATH}*${n}.py ${MIGRATIONS_VERSIONS_PATH}${CLEANED_FILE_NAME};
+    break;
+  }
+done

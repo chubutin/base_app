@@ -1,17 +1,15 @@
 from datetime import timedelta
-from typing import Union
 
 from fastapi import Depends, HTTPException, APIRouter
 from fastapi.security import OAuth2PasswordRequestForm
-from pydantic import EmailStr
 from starlette import status
 
-from auth import create_access_token, verify_password
-from auth.user import get_current_active_user
+from auth import create_access_token
+from auth.user import get_current_active_user, authenticate_user, create_dict_for_access_token
 from models.auth import Token
 from models.user import User
 from schemas.user import UserSchema, UserExternalSchema
-from services.user import UserService, UserCRUD
+from services.user import UserService
 from settings import Settings
 from utils.errors import IntegrityErrorException
 
@@ -33,19 +31,6 @@ user_router_no_auth_required = APIRouter(
     tags=["users"],
     responses={404: {"description": "Not found"}},
 )
-
-
-def authenticate_user(username: str, password: str) -> Union[User, bool]:
-    user = UserCRUD.get_user_by_username(username=username)
-    if not user:
-        return False
-    if not verify_password(password, user.password):
-        return False
-    return user
-
-
-def create_dict_for_access_token(username: str):
-    return {"sub": username}
 
 
 @login_router.post("", response_model=Token)
@@ -74,7 +59,7 @@ async def route_read_users_me(current_user: User = Depends(get_current_active_us
 async def route_create_user(user: UserSchema):
     try:
         user_model = User(**user.dict())
-        created_user = UserService.create_user(user_model)
+        created_user = UserService().create_user(user_model)
         return UserExternalSchema(**created_user.__dict__)
     except IntegrityErrorException as exc:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
@@ -84,7 +69,7 @@ async def route_create_user(user: UserSchema):
 @user_router_no_auth_required.get("/activate")
 async def route_activate_user(activation_code: str):
     try:
-        UserService.activate_user(activation_code=activation_code)
+        UserService().activate_user(activation_code=activation_code)
         return {'message': 'User Activated'}
     except IntegrityErrorException as exc:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,

@@ -51,6 +51,8 @@ services:
       - ./db/01_setup_database.sh:/docker-entrypoint-initdb.d/01_setup_database.sh:ro
     networks:
       - app-network
+    profiles:
+      - infra
 
   mail_dev:
     image: mailhog/mailhog
@@ -62,6 +64,8 @@ services:
       - "8025:8025" # web ui
     networks:
       - app-network
+    profiles:
+      - infra
 
 
 volumes:

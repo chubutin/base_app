@@ -15,21 +15,6 @@ db_string_connection = f"postgresql://{Settings().db_username}:{Settings().db_pa
 engine = create_engine(db_string_connection)
 
 # create a configured "Session" class
-Session = sessionmaker(bind=engine, expire_on_commit=False)
+SessionLocal = sessionmaker(bind=engine, expire_on_commit=False)
 
 Base = declarative_base()
-
-@contextmanager
-def session_scope():
-    """Provide a transactional scope around a series of operations."""
-    session = Session()
-    try:
-        yield session
-        session.commit()
-    except IntegrityError as exc:
-        raise IntegrityErrorException(exc.orig.diag)
-    except:
-        session.rollback()
-        raise
-    finally:
-        session.close()

@@ -28,6 +28,7 @@ if config.config_file_name is not None:
 
 from app.models import user
 from app.models import player
+from app.models.reservation import players_reservations_table, Reservation
 
 from app.models import base_model
 target_metadata = base_model.Base.metadata

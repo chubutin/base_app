@@ -5,7 +5,7 @@ from models.base_model import AppBaseModel
 
 
 class User(AppBaseModel):
-    __tablename__ = 'user'
+    __tablename__ = 'users'
     __table_args__ = (sa.UniqueConstraint("username"),
                       sa.UniqueConstraint("email")
                       )

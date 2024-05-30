@@ -20,7 +20,7 @@ class UserFactory(SQLAlchemyModelFactory):
     class Meta:
         model = User
 
-    username = factory.LazyFunction(fake.name)
+    username = factory.LazyFunction(fake.email)
     email = factory.LazyFunction(fake.email)
     first_name = fake.name()
     last_name = fake.last_name()

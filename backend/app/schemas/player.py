@@ -8,4 +8,3 @@ class PlayerSchema(AppBaseModelSchema):
 
     handicap: Optional[float]
     user: UserExternalSchema
-    golfer_id: int

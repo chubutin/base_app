@@ -3,6 +3,7 @@ import uuid
 
 from services.player import PlayerCRUD, PlayerService
 from tests.factories import UserFactory, PlayerFactory
+from utils import SessionLocal
 from utils.errors import IntegrityErrorException
 
 
@@ -26,24 +27,28 @@ class TestPlayerService(TestCase):
 
 class TestPlayerCRUD(TestCase):
 
+    def setUp(self) -> None:
+        super(TestPlayerCRUD, self).setUp()
+        self.session = SessionLocal()
+
     def test_create_player(self):
         user = UserFactory.build()
         player = PlayerFactory.build()
         player.user = user
-        player_db = PlayerCRUD.save_player(player)
+        player_db = PlayerCRUD.save_player(player, self.session)
         self.assertIsNotNone(player_db)
 
     def test_create_second_player_with_same_user_raises_exception(self):
         user = UserFactory.build()
         player = PlayerFactory.build()
         player.user = user
-        player_db = PlayerCRUD.save_player(player)
+        player_db = PlayerCRUD.save_player(player, self.session)
         self.assertIsNotNone(player_db)
         player = PlayerFactory.build()
         player.user = user
 
         with self.assertRaises(IntegrityErrorException):
-            PlayerCRUD.save_player(player)
+            PlayerCRUD.save_player(player, self.session)
 
     def test_get_player_by_id(self):
         user = UserFactory.build()
@@ -54,16 +59,6 @@ class TestPlayerCRUD(TestCase):
 
     def test_get_player_by_id_not_exist(self):
         self.assertIsNone(PlayerCRUD.get_player_by_id(uuid.uuid4()))
-
-    def test_get_golfer_id(self):
-        user = UserFactory.build()
-        player = PlayerFactory.build()
-        player.user = user
-        player_db = PlayerCRUD.save_player(player)
-        self.assertIsNotNone(PlayerCRUD.get_player_by_golfer_id(player_db.golfer_id))
-
-    def test_get_player_by_golfer_id_not_exist(self):
-        self.assertIsNone(PlayerCRUD.get_player_by_golfer_id(111111))
 
     def test_get_player_by_user_id(self):
         user = UserFactory.build()

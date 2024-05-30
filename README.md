@@ -24,6 +24,16 @@ bin/tests
 bin/up
 ```
 
+### How to rebuild the project without deleting everything with bin/setup
+```shell
+bin/build
+```
+
+### How to update models in alembic
+```shell
+bin/gene
+```
+
 JSON Api is published on http://localhost:3000/docs
 
 ### How to Remote Debug in Pycharm

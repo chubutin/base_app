@@ -3,10 +3,10 @@
 set -e # Exit immediately if a command exits with a non-zero exit status.
 
 BUILD_ENVIRONMENTS=${BUILD_ENVIRONMENTS:-"dev test"}
+
 for environment in $BUILD_ENVIRONMENTS
 do
-  DOCKER_APP_ID=`docker-compose -f ./docker-compose.$environment.yml ps -q app_$environment`
-
+  DOCKER_APP_ID=`docker-compose -f ./docker-compose.$environment.yml ps -q app_$environment || echo ''`
   if [ -z $DOCKER_APP_ID ] || [ -z `docker ps -q --no-trunc | grep $DOCKER_APP_ID` ]; then
     echo "Running in new $environment container"
     docker-compose -f ./docker-compose.$environment.yml run app_$environment alembic upgrade head "$@"
@@ -14,5 +14,7 @@ do
     echo "Running in existing $environment container ${DOCKER_APP_ID}"
     docker-compose -f ./docker-compose.$environment.yml exec app_$environment alembic upgrade head "$@"
   fi
-  docker-compose -f ./docker-compose.$environment.yml stop "$@"
 done
+
+echo "Generating database schema file"
+bin/dump_schema
